@@ -15,9 +15,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData.dark(),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      debugShowCheckedModeBanner: false,
+      title: 'ericódigos',
+      theme: ThemeData.dark(
+
+      ),
+      home: ChatScreen(),
+      //home: const MyHomePage(title: 'ericódigos'),
     );
   }
 }
@@ -108,3 +112,45 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+class ChatScreen extends StatefulWidget {
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+
+  final _textController = TextEditingController();
+
+  void _handleSubmitted(String text){
+    _textController.clear();
+  }
+
+  // Private method, configures TextField widget
+  Widget _buildTextComposer(){
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: TextField(
+        controller: _textController,
+        // Callback method
+        onSubmitted: _handleSubmitted,
+        decoration: const InputDecoration.collapsed(hintText: 'Send a message'),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Chat')
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: _buildTextComposer(),
+      ),
+
+    );
+  }
+}
+
