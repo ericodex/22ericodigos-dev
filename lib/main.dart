@@ -1,8 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+// ███████ ██████  ██  ██████  ██████  ██████  ██  ██████   ██████  ███████
+// ██      ██   ██ ██ ██      ██    ██ ██   ██ ██ ██       ██    ██ ██
+// █████   ██████  ██ ██      ██    ██ ██   ██ ██ ██   ███ ██    ██ ███████
+// ██      ██   ██ ██ ██      ██    ██ ██   ██ ██ ██    ██ ██    ██      ██
+// ███████ ██   ██ ██  ██████  ██████  ██████  ██  ██████   ██████  ███████
 // 18 - JAN - 22
 // Application for professional information display
-// ericodigos
+
 
 void main() {
   runApp(const MyApp());
@@ -76,9 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
           //
           // Invoke "debug painting" (press "p" in the console, choose the
           // "Toggle Debug Paint" action from the Flutter Inspector in Android
@@ -120,21 +123,52 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
 
+  final List<ChatMessage> _messages = [];
+
   final _textController = TextEditingController();
+
+  final FocusNode _focusNode = FocusNode();
 
   void _handleSubmitted(String text){
     _textController.clear();
+    // When the user sends a chat message from the text field, the app should add the new message to the message list.
+    var message = ChatMessage(text: text);
+
+    setState(() {
+      _messages.insert(0, message);
+    });
+    _focusNode.requestFocus();
+
   }
 
   // Private method, configures TextField widget
   Widget _buildTextComposer(){
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: TextField(
-        controller: _textController,
-        // Callback method
-        onSubmitted: _handleSubmitted,
-        decoration: const InputDecoration.collapsed(hintText: 'Send a message'),
+      child: Row(
+        children: [
+          Flexible(
+            child: TextField(
+              controller: _textController,
+              // Callback method
+              onSubmitted: _handleSubmitted,
+              decoration: const InputDecoration.collapsed(hintText: 'Send a message'),
+              focusNode: _focusNode,
+            ),
+          ),
+          IconTheme(
+            data: IconThemeData(color: Theme.of(context).colorScheme.secondary),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: () => _handleSubmitted(_textController.text)),
+              ),
+              ),
+          ),
+        ],
       ),
     );
   }
@@ -143,14 +177,72 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat')
+        title: const Text('FriendlyChat')
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: _buildTextComposer(),
-      ),
-
+      body: Column(
+        children: [
+          Flexible(
+            //The ListView.builder factory method builds a list on demand by providing a function that is called once per
+            //item in the list. The function returns a new widget at each call. The builder also automatically detects mutations of
+            //its children parameter and initiates a rebuild.
+              child: ListView.builder(
+                  padding: const EdgeInsets.all(8),
+                  reverse: true,
+                  itemBuilder: (_,index) => _messages[index],
+                  itemCount: _messages.length,
+              ),
+          ),
+          const Divider(height: 1.0),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor),
+            child: _buildTextComposer(),
+            ),
+        ],
+      )
     );
   }
 }
+
+class ChatMessage extends StatelessWidget {
+
+  // Variable and constructors
+  const ChatMessage({
+    required this.text,
+    Key? key,
+  }) : super(key: key);
+
+  final String text;
+
+  final String _name = 'Eric O Lima';
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        crossAxisAlignment:CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 16),
+            child: CircleAvatar(child: Text(_name[0])),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(_name, style: Theme.of(context).textTheme.headline4,),
+              Container(
+                margin: const EdgeInsets.only(top: 5),
+                child: Text(text),
+              )
+            ],
+          )
+        ],
+      ),
+    );
+  }
+}
+
+
+
 
