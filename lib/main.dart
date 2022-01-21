@@ -136,9 +136,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FriendlyChat')
-      ),
+
       body: Column(
         children: [
           Flexible(

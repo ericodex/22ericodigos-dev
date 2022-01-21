@@ -1,6 +1,6 @@
 # ericode2022
 
-2022 Personal website  - Professor Ericode
+2022 Personal website  - Professor EricÓdigos
 
 ## Getting Started
 
