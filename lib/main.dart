@@ -1,7 +1,3 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-
 // ███████ ██████  ██  ██████  ██████  ██████  ██  ██████   ██████  ███████
 // ██      ██   ██ ██ ██      ██    ██ ██   ██ ██ ██       ██    ██ ██
 // █████   ██████  ██ ██      ██    ██ ██   ██ ██ ██   ███ ██    ██ ███████
@@ -10,6 +6,9 @@ import 'package:flutter/foundation.dart';
 // 18 - JAN - 22
 // Application for professional information display
 
+import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:ericode2022/rootPages.dart';
 
 void main() {
   runApp(const MyApp());
@@ -51,11 +50,15 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'ericódigos',
       theme: defaultTargetPlatform == TargetPlatform.iOS ? KDefaultTheme : KIOSTheme,
-      home: ChatScreen(),
+      //home: ChatScreen(),
+      home: const LandingPage(),
       //home: const MyHomePage(title: 'ericódigos'),
     );
   }
 }
+
+
+
 
 class ChatScreen extends StatefulWidget {
   @override
