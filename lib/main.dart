@@ -186,7 +186,7 @@ class ChatMessage extends StatelessWidget {
 
   final String text;
   final AnimationController animationController;
-  final String _name = 'Eric O Lima';
+  final String _name = '>';
 
   @override
   Widget build(BuildContext context) {
