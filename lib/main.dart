@@ -9,13 +9,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:ericode2022/rootPages.dart';
+import 'colors.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-// Theme
-final ThemeData KIOSTheme = ThemeData(
+// Theme Dark
+final ThemeData DarkTheme = ThemeData(
   primarySwatch: Colors.green,
   primaryColor: Colors.grey[100],
   primaryColorBrightness: Brightness.light,
@@ -36,6 +37,13 @@ final ThemeData KIOSTheme = ThemeData(
   ),
 );
 
+// Theme Light
+final ThemeData LightTheme = ThemeData(
+  colorScheme: const ColorScheme.light(
+    primary: Colors.green,
+  ),
+);
+
 final ThemeData KDefaultTheme = ThemeData(
   colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.purple).copyWith(secondary: Colors.greenAccent[400])
 );
@@ -49,7 +57,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ericódigos',
-      theme: defaultTargetPlatform == TargetPlatform.iOS ? KDefaultTheme : KIOSTheme,
+      theme: DarkTheme,
       //home: ChatScreen(),
       home: const LandingPage(),
       //home: const MyHomePage(title: 'ericódigos'),

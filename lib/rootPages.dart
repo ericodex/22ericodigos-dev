@@ -17,19 +17,19 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
-
   int _selectedIndex = 0;
-  static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-   final List<Widget> _widgetOptions = <Widget>[
-      const FrontPageFoto(),
-      ChatScreen(),
-      const Padding(
-        padding: EdgeInsets.all(18.0),
-        child: Text(
+  static const TextStyle optionStyle =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  final List<Widget> _widgetOptions = <Widget>[
+    const FrontPageFoto(),
+    ChatScreen(),
+    const Padding(
+      padding: EdgeInsets.all(18.0),
+      child: Text(
         'Acadêmico de Licenciatura em Computação no Instituto Federal do Triângulo Mineiro',
         style: optionStyle,
-    ),
       ),
+    ),
   ];
 
   void _onItemTapped(int index) {
@@ -44,7 +44,6 @@ class _LandingPageState extends State<LandingPage> {
       appBar: AppBar(
         title: const Text('ericodigos.dev'),
       ),
-
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
@@ -86,31 +85,32 @@ class FrontPageFoto extends StatelessWidget {
                 minHeight: viewportConstraints.maxHeight,
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                //mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: Container(
-                  width: 200.0,
-                  height: 200.0,
-                  decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                          fit: BoxFit.fill,
-                          image: NetworkImage(
-                              "https://avatars2.githubusercontent.com/u/32937165?s=460&v=4")))),
-            ),
-                  Padding(
-                padding: const EdgeInsets.all(18.0),
-                child: Text(
-                  'Arquiteto de sistemas de informação, desenvolvedor e mantenedor de ecossistemas digitais. Atuação em projetos web com Dart/Flutter, Java Spring e .NET Core/MVC. Conhecimento em Bootstrap, JQuery, SQL, NoSQL, Integration Services (ETL), Oracle, Python e Jupyter Notebooks.  Atualizações de certificados de segurança de domínio e criptografia OpenSSL. Implementações de microserviços com Docker, Kubernetes/Portainer em nuvens públicas e privadas.',
-                  textAlign: TextAlign.start,
-                  softWrap: true,
-                  style:
-                      TextStyle(fontSize: 26, height: 1.3, color: Colors.blue[100]),
-                ),
-              ),
+                    padding: const EdgeInsets.all(18.0),
+                    child: Container(
+                        width: 270.0,
+                        height: 290.0,
+                        decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                                fit: BoxFit.fitHeight,
+                                image: NetworkImage(
+                                    "https://avatars2.githubusercontent.com/u/32937165?s=460&v=4")))),
+                  ),
+                  
+                  const Padding(
+                    padding: EdgeInsets.all(18.0),
+                    child: SizedBox(
+                      width: 400,
+                      child: Text(
+                          'Arquiteto de sistemas de informação, desenvolvedor e mantenedor de ecossistemas digitais. Atuação em projetos web com Dart/Flutter, Java Spring e .NET Core/MVC. Conhecimento em Bootstrap, JQuery, SQL, NoSQL, Integration Services (ETL), Oracle, Python e Jupyter Notebooks.  Atualizações de certificados de segurança de domínio e criptografia OpenSSL. Implementações de microserviços com Docker, Kubernetes/Portainer em nuvens públicas e privadas.',
+                          textAlign: TextAlign.start,
+                          softWrap: true),
+                    ),
+                  ),
                 ],
               ),
             ),
