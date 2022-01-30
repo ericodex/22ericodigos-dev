@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "177512589026",
+    "firebase_url": "https://ericodigos.firebaseio.com",
+    "project_id": "ericodigos",
+    "storage_bucket": "ericodigos.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:177512589026:android:83378967281696c43de0bb",
+        "android_client_info": {
+          "package_name": "com.a034.ericode2022"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "177512589026-omcb9qps4fiacg5kbrn1ac79hih9l7lv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsp3PeV9f9ZJ5nb1JvxajJNLnO2MsJGN8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "177512589026-4g1t7rthvltpqpkuc6fiudplqrcds0so.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

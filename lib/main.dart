@@ -9,8 +9,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:ericode2022/rootPages.dart';
-import 'colors.dart';
+import 'themes.dart';
 import 'package:get/get.dart';
+
 
 void main() {
   runApp(SwitchMaterial());
