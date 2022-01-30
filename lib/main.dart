@@ -18,14 +18,14 @@ void main() {
 
 // Theme Dark
 final ThemeData _darkTheme = ThemeData(
-  primarySwatch: Colors.green,
-  primaryColor: Colors.grey[100],
-  primaryColorBrightness: Brightness.light,
+  //primarySwatch: Colors.green,
+  //primaryColor: Colors.grey[100],
+  primaryColorBrightness: Brightness.dark,
   colorScheme: const ColorScheme.dark(
       onPrimary: Colors.amber,
-      secondary: Colors.orange,
+      secondary: Colors.green,
       onSecondary: Colors.pink,
-      primary: Colors.blue,
+      primary: Colors.green,
       background: Colors.cyan,
       brightness: Brightness.dark,
       primaryVariant: Colors.greenAccent,
@@ -40,7 +40,19 @@ final ThemeData _darkTheme = ThemeData(
 // Theme Light
 final ThemeData _lightTheme = ThemeData(
   colorScheme: const ColorScheme.light(
-    primary: Colors.green,
+     primary: Colors.green,
+     onPrimary: Colors.white,
+     secondary: Colors.green,
+     onSecondary: Colors.pink,
+     background: Colors.cyan,
+     brightness: Brightness.light,
+     primaryVariant: Colors.greenAccent,
+     //onBackground: Colors.purple,
+     onSurface: Colors.green,
+     //secondaryVariant: Colors.blueGrey,
+     surface: Colors.grey,
+     error: Colors.red,
+     onError: Colors.redAccent
   ),
 );
 
@@ -185,15 +197,36 @@ class _FrontPageFotoState extends State<FrontPageFoto> {
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(18.0),
-                    child: Container(
-                        width: 270.0,
-                        height: 290.0,
-                        decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                                fit: BoxFit.fitHeight,
-                                image: NetworkImage(
-                                    "https://avatars2.githubusercontent.com/u/32937165?s=460&v=4")))),
+                    child: SizedBox(
+                      width: _width < 900 ? _width * 0.80 : _width / 2,
+                      child: Card(
+                        elevation: 8,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(0,18,0,18),
+                          child: Column(
+                            children: [
+                              Container(
+                                  width: 270.0,
+                                  height: 290.0,
+                                  decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          fit: BoxFit.fitHeight,
+                                          image: NetworkImage(
+                                              "https://avatars2.githubusercontent.com/u/32937165?s=460&v=4")))),
+                              Card(
+                                elevation: 12,
+                                color: Theme.of(context).colorScheme.secondary,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text('ERIC OLIVEIRA LIMA'),
+                                ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(18.0),
