@@ -7,14 +7,20 @@
 // Application for professional information display
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:ericode2022/rootPages.dart';
-import 'themes.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ericode2022/firebase_config.dart';
 import 'package:get/get.dart';
+import 'loginAndRegister.dart';
 
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
-void main() {
-  runApp(SwitchMaterial());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseConfig.platformOptions);
+  await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+
+  runApp(const RootNavigator());
 }
 
 // Theme Dark
@@ -41,229 +47,249 @@ final ThemeData _darkTheme = ThemeData(
 // Theme Light
 final ThemeData _lightTheme = ThemeData(
   colorScheme: const ColorScheme.light(
-     primary: Colors.green,
-     onPrimary: Colors.white,
-     secondary: Colors.green,
-     onSecondary: Colors.pink,
-     background: Colors.cyan,
-     brightness: Brightness.light,
-     primaryVariant: Colors.greenAccent,
-     //onBackground: Colors.purple,
-     onSurface: Colors.green,
-     //secondaryVariant: Colors.blueGrey,
-     surface: Colors.grey,
-     error: Colors.red,
-     onError: Colors.redAccent
-  ),
+      primary: Colors.green,
+      onPrimary: Colors.white,
+      secondary: Colors.green,
+      onSecondary: Colors.pink,
+      background: Colors.cyan,
+      brightness: Brightness.light,
+      primaryVariant: Colors.greenAccent,
+      //onBackground: Colors.purple,
+      onSurface: Colors.green,
+      //secondaryVariant: Colors.blueGrey,
+      surface: Colors.grey,
+      error: Colors.red,
+      onError: Colors.redAccent),
 );
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return const SwitchMaterial();
-  }
-}
-
-class SwitchMaterial extends StatefulWidget {
-  const SwitchMaterial({
+class RootNavigator extends StatefulWidget {
+  const RootNavigator({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<SwitchMaterial> createState() => _SwitchMaterialState();
+  State<RootNavigator> createState() => _RootNavigatorState();
 }
 
-class _SwitchMaterialState extends State<SwitchMaterial> {
-  late bool isInstructionView;
-  @override
-  void initState() {
-    isInstructionView = Global.shared.isInstructionView;
-    super.initState();
-  }
-  int _selectedIndex = 0;
-  
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 16, fontWeight: FontWeight.normal);
-  final List<Widget> _widgetOptions = <Widget>[
-    const FrontPageFoto(),
-    const ChatScreen(),
-    Column(
-      children: const <Widget>[
-        Padding(
-          padding: EdgeInsets.all(18.0),
-          child: Text(
-            'Acadêmico de Licenciatura em Computação no Instituto Federal do Triângulo Mineiro',
-            style: optionStyle,
-          ),
-        ),
-      ],
-    ),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+class _RootNavigatorState extends State<RootNavigator> {
   //ThemeMode _themeMode = ThemeMode.system;
-  
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      routes: <String, WidgetBuilder>{
+        '/a': (BuildContext context) => FullPageHome(),
+        '/b': (BuildContext context) => ChatPage(),
+        '/c': (BuildContext context) => LoginPage(),
+        '/register': (BuildContext context) => RegisterPage(),
+      },
+      initialRoute: '/a',
       debugShowCheckedModeBanner: false,
       title: 'ericódigos',
       theme: _lightTheme,
       darkTheme: _darkTheme,
       themeMode: ThemeMode.system,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('ericodigos.dev'),
-          actions: <Widget>[
-            Switch(
-              value: isInstructionView, 
-              onChanged: (bool isOn){
-                setState(() {
-                  isInstructionView = isOn;
-                  Global.shared.isInstructionView = isOn;
-                  isOn =!isOn;
-                  isOn ? Get.changeThemeMode(ThemeMode.dark) : Get.changeThemeMode(ThemeMode.light);
-                });
-              })
+      //home:
+    );
+  }
+}
 
-          ],
-        ),
-        body: Center(
-          child: _widgetOptions.elementAt(_selectedIndex),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.business),
-              label: 'Business',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.school),
-              label: 'School',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.amber[800],
-          onTap: _onItemTapped,
-        ),
+class SimplePage extends StatefulWidget {
+  const SimplePage({Key? key}) : super(key: key);
+
+  @override
+  _SimplePageState createState() => _SimplePageState();
+}
+
+class _SimplePageState extends State<SimplePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [const TextField()],
       ),
     );
   }
 }
-class Global{
-  static final shared =Global();
+
+class Global {
+  static final shared = Global();
   bool isInstructionView = false;
 }
-class FrontPageFoto extends StatefulWidget {
-  const FrontPageFoto({Key? key}) : super(key: key);
+
+class FullPageHome extends StatefulWidget {
+  const FullPageHome({Key? key}) : super(key: key);
 
   @override
-  State<FrontPageFoto> createState() => _FrontPageFotoState();
-  
+  State<FullPageHome> createState() => _FullPageHomeState();
 }
 
-class _FrontPageFotoState extends State<FrontPageFoto> {
-  
+class _FullPageHomeState extends State<FullPageHome> {
+  late bool isInstructionView;
+  User? user;
+  @override
+  void initState() {
+    isInstructionView = Global.shared.isInstructionView;
+    _auth.userChanges().listen(
+          (event) => setState(() => user = event),
+        );
+    super.initState();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     double _width = MediaQuery.of(context).size.width;
+
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.bodyText2!,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints viewportConstraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: viewportConstraints.maxHeight,
-              ),
-              child: Column(
-                //mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: SizedBox(
-                      width: _width < 900 ? _width * 0.80 : _width / 2,
-                      child: Card(
-                        elevation: 8,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(0,18,0,18),
-                          child: Column(
-                            children: [
-                              Container(
-                                  width: 270.0,
-                                  height: 290.0,
-                                  decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                          fit: BoxFit.fitHeight,
-                                          image: NetworkImage(
-                                              "https://avatars2.githubusercontent.com/u/32937165?s=460&v=4")))),
-                              Card(
-                                elevation: 12,
-                                color: Theme.of(context).colorScheme.secondary,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text('ERIC OLIVEIRA LIMA'),
-                                ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: SizedBox(
-                      width: _width < 900 ? _width * 0.80 : _width / 2,
-                      child: const Card(
-                        elevation: 8,
-                        child: Padding(
-                          padding: EdgeInsets.all(18.0),
-                          child: Text(
-                              'Arquiteto de sistemas de informação, desenvolvedor e mantenedor de ecossistemas digitais. Atuação em projetos web com Dart/Flutter, Java Spring e .NET Core/MVC. Conhecimento em Bootstrap, JQuery, SQL, NoSQL, Integration Services (ETL), Oracle, Python e Jupyter Notebooks.  Atualizações de certificados de segurança de domínio e criptografia OpenSSL. Implementações de microserviços com Docker, Kubernetes/Portainer em nuvens públicas e privadas.',
-                              textAlign: TextAlign.start,
-                              style: TextStyle(fontSize: 16),
-                              softWrap: true),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('ericodigos.dev'),
+          actions: <Widget>[
+            IconButton(
+              color: user == null ? Colors.white : Colors.blue,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+                },
+                icon: const Icon(Icons.person)),
+            Switch(
+                value: isInstructionView,
+                onChanged: (bool isOn) {
+                  setState(() {
+                    isInstructionView = isOn;
+                    Global.shared.isInstructionView = isOn;
+                    isOn = !isOn;
+                    isOn
+                        ? Get.changeThemeMode(ThemeMode.dark)
+                        : Get.changeThemeMode(ThemeMode.light);
+                  });
+                })
+          ],
+        ),
+        body: Center(
+          child: BodyFrontPage(width: _width),
+        ),
+        
       ),
     );
   }
 }
 
-class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+class BodyFrontPage extends StatelessWidget {
+  const BodyFrontPage({
+    Key? key,
+    required double width,
+  })  : _width = width,
+        super(key: key);
+
+  final double _width;
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  Widget build(BuildContext context) {
+    //double _height = MediaQuery.of(context).size.height;
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints viewportConstraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: viewportConstraints.maxHeight,
+              //maxHeight: _height
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: SizedBox(
+                    width: _width < 900 ? _width * 0.80 : _width / 2,
+                    child: Card(
+                      elevation: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 18, 0, 18),
+                        child: Column(
+                          children: [
+                            Container(
+                                width: 270.0,
+                                height: 290.0,
+                                decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        fit: BoxFit.fitHeight,
+                                        image: NetworkImage(
+                                            "https://avatars2.githubusercontent.com/u/32937165?s=460&v=4")))),
+                            Card(
+                              elevation: 12,
+                              color: Theme.of(context).colorScheme.secondary,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text('ERIC OLIVEIRA LIMA'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: SizedBox(
+                    width: _width < 900 ? _width * 0.80 : _width / 2,
+                    child: const Card(
+                      elevation: 8,
+                      child: Padding(
+                        padding: EdgeInsets.all(18.0),
+                        child: Text(
+                            'Arquiteto de sistemas de informação, desenvolvedor e mantenedor de ecossistemas digitais. Atuação em projetos web com Dart/Flutter, Java Spring e .NET Core/MVC. Conhecimento em Bootstrap, JQuery, SQL, NoSQL, Integration Services (ETL), Oracle, Python e Jupyter Notebooks.  Atualizações de certificados de segurança de domínio e criptografia OpenSSL. Implementações de microserviços com Docker, Kubernetes/Portainer em nuvens públicas e privadas.',
+                            textAlign: TextAlign.start,
+                            style: TextStyle(fontSize: 16),
+                            softWrap: true),
+                      ),
+                    ),
+                  ),
+                ),
+                //Divider(),
+                Card(
+                  elevation: 8,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      IconButton(onPressed: () {}, icon: Icon(Icons.home)),
+                      IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const ChatPage()),
+                            );
+                          },
+                          icon: Icon(Icons.business)),
+                      IconButton(onPressed: () {}, icon: Icon(Icons.school))
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
-class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
+class ChatPage extends StatefulWidget {
+  const ChatPage({Key? key}) : super(key: key);
+
+  @override
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final List<ChatMessage> _messages = [];
   final _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -352,7 +378,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             itemCount: _messages.length,
           ),
         ),
-        const Divider(height: 1.0),
+        //const Divider(height: 1.0),
         Container(
           decoration: Theme.of(context).platform == TargetPlatform.iOS
               ? BoxDecoration(color: Theme.of(context).cardColor)
