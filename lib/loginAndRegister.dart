@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'main.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,11 +21,6 @@ import 'package:get/get.dart';
 //import 'main.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-
-class Global {
-  static final shared = Global();
-  bool isInstructionView = false;
-}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -48,16 +44,19 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     isInstructionView = Global.shared.isInstructionView;
+
     _usernameFocusNode.addListener(() {
       setState(() {
         //Redraw so that the username label reflects the focus state
       });
     });
+
     _passwordFocusNode.addListener(() {
       setState(() {
         //Redraw so that the password label reflects the focus state
       });
     });
+
     _auth.userChanges().listen(
           (event) => setState(() => user = event),
         );
@@ -67,15 +66,12 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     double _height = MediaQuery.of(context).size.height;
     double _width = MediaQuery.of(context).size.width;
+    bool isOn = Global.shared.isInstructionView;
     var buttonBar = ButtonBar(
       children: <Widget>[
         ElevatedButton(
           child: const Text('Registrar'),
           style: ButtonStyle(
-            backgroundColor:
-                MaterialStateColor.resolveWith((states) => Colors.amberAccent),
-            foregroundColor:
-                MaterialStateColor.resolveWith((states) => Colors.black),
             elevation: MaterialStateProperty.all(8.0),
             shape: MaterialStateProperty.all(
               const BeveledRectangleBorder(
@@ -128,80 +124,76 @@ class _LoginPageState extends State<LoginPage> {
         actions: <Widget>[
           IconButton(
               color: user == null ? Colors.white : Colors.blue,
-              onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => const LoginPage()),
-                // );
-              },
+              onPressed: () {},
               icon: const Icon(Icons.person)),
-          Switch(
-              value: isInstructionView,
-              onChanged: (bool isOn) {
+          IconButton(
+              onPressed: () {
                 setState(() {
-                  isInstructionView = isOn;
-                  Global.shared.isInstructionView = isOn;
-                  isOn = !isOn;
                   isOn
                       ? Get.changeThemeMode(ThemeMode.dark)
                       : Get.changeThemeMode(ThemeMode.light);
+                  isOn = !isOn;
+                  Global.shared.isInstructionView = isOn;
                 });
-              })
+              },
+              icon: Icon(Global.shared.isInstructionView ? Icons.dark_mode : Icons.light_mode)),
         ],
       ),
       body: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints viewportConstraints){
-  return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: viewportConstraints.maxHeight),
-            child: Column(
+        builder: (BuildContext context, BoxConstraints viewportConstraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints:
+                  BoxConstraints(minHeight: viewportConstraints.maxHeight),
+              child: Column(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(),
-                SizedBox(
-                  width: _width < 900 ? _width * 0.80 : _width/2,
-                  child: Card(
-                    borderOnForeground: true,
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: <Widget>[
-                      const SizedBox(height: 10.0),
-                      Image.asset('assets/diamond.png'),
-                      const SizedBox(height: 5.0),
-                      Text(
-                        'LOGIN',
-                        style: Theme.of(context).textTheme.headline5,
-                      ),
-                      const SizedBox(height: 5.0),
-                      user != null ? _UserInfoCard(user: user) : Container(),
-                      const SizedBox(height: 10.0),
-                      user == null
-                          ? Padding(
-                            padding: const EdgeInsets.all(18.0),
-                            child: CardUserPass(
-                                usernameController: _usernameController,
-                                usernameFocusNode: _usernameFocusNode,
-                                unfocusedColor: _unfocusedColor,
-                                passwordController: _passwordController,
-                                passwordFocusNode: _passwordFocusNode),
-                          )
-                          : Container(),
-                      user == null ? buttonBar : Container(),
-                        ],
+                children: [
+                  Container(),
+                  SizedBox(
+                    width: _width < 900 ? _width * 0.80 : _width / 2,
+                    child: Card(
+                      elevation: 8,
+                      borderOnForeground: true,
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: <Widget>[
+                            const SizedBox(height: 10.0),
+                            Image.asset('assets/diamond.png'),
+                            const SizedBox(height: 5.0),
+                            Text(
+                              'LOGIN',
+                              style: Theme.of(context).textTheme.headline5,
+                            ),
+                            const SizedBox(height: 5.0),
+                            user != null
+                                ? _UserInfoCard(user: user)
+                                : Container(),
+                            const SizedBox(height: 10.0),
+                            user == null
+                                ? Padding(
+                                    padding: const EdgeInsets.all(18.0),
+                                    child: CardUserPass(
+                                        usernameController: _usernameController,
+                                        usernameFocusNode: _usernameFocusNode,
+                                        unfocusedColor: _unfocusedColor,
+                                        passwordController: _passwordController,
+                                        passwordFocusNode: _passwordFocusNode),
+                                  )
+                                : Container(),
+                            user == null ? buttonBar : Container(),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      
+          );
         },
-      
       ),
     );
   }
@@ -255,6 +247,7 @@ class CardUserPass extends StatelessWidget {
       child: Column(
         children: [
           TextField(
+            enableSuggestions: true,
             controller: _usernameController,
             decoration: InputDecoration(
               labelText: 'Usuário',
@@ -268,7 +261,7 @@ class CardUserPass extends StatelessWidget {
           const SizedBox(height: 12.0),
           TextField(
             obscureText: true,
-            enableSuggestions: false,
+            enableSuggestions: true,
             autocorrect: false,
             controller: _passwordController,
             decoration: InputDecoration(
@@ -523,7 +516,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _unfocusedColor = Colors.grey[600];
   final _usernameFocusNode = FocusNode();
@@ -531,22 +524,26 @@ class _RegisterPageState extends State<RegisterPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool? _success;
   String _userEmail = '';
+  String _error = '';
   User? user;
   late bool isInstructionView;
   @override
   void initState() {
     super.initState();
     isInstructionView = Global.shared.isInstructionView;
-    // _usernameFocusNode.addListener(() {
-    //   setState(() {
-    //     //Redraw so that the username label reflects the focus state
-    //   });
-    // });
-    // _passwordFocusNode.addListener(() {
-    //   setState(() {
-    //     //Redraw so that the password label reflects the focus state
-    //   });
-    // });
+
+    _usernameFocusNode.addListener(() {
+      setState(() {
+        //Redraw so that the username label reflects the focus state
+      });
+    });
+
+    _passwordFocusNode.addListener(() {
+      setState(() {
+        //Redraw so that the password label reflects the focus state
+      });
+    });
+
     _auth.userChanges().listen(
           (event) => setState(() => user = event),
         );
@@ -554,45 +551,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    double _width = MediaQuery.of(context).size.width;
     var buttonBar = ButtonBar(
       children: <Widget>[
         ElevatedButton(
           child: const Text('Registrar'),
-          style: ButtonStyle(
-            backgroundColor:
-                MaterialStateColor.resolveWith((states) => Colors.amberAccent),
-            foregroundColor:
-                MaterialStateColor.resolveWith((states) => Colors.black),
-            elevation: MaterialStateProperty.all(8.0),
-            shape: MaterialStateProperty.all(
-              const BeveledRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(7.0)),
-              ),
-            ),
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const RegisterPage()),
-            );
-          },
-        ),
-        // TextButton(
-        //   child: const Text('Cancelar'),
-        //   style: ButtonStyle(
-        //       foregroundColor: MaterialStateProperty.all(
-        //           Theme.of(context).colorScheme.secondary),
-        //       shape: MaterialStateProperty.all(
-        //           const BeveledRectangleBorder(
-        //               borderRadius:
-        //                   BorderRadius.all(Radius.circular(7))))),
-        //   onPressed: () {
-        //     _usernameController.clear();
-        //     _passwordController.clear();
-        //   },
-        // ),
-        ElevatedButton(
-          child: const Text('Entrar'),
           style: ButtonStyle(
             elevation: MaterialStateProperty.all(8.0),
             shape: MaterialStateProperty.all(
@@ -603,99 +566,113 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              await _signInWithEmailAndPassword();
+              await _register();
+              //print(_error);
+              //ScaffoldSnackbar.of(context).show(_error.replaceAll('[firebase_auth/invalid-email]',''));
             }
           },
         ),
       ],
     );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('ericodigos.dev'),
         actions: <Widget>[
           IconButton(
               color: user == null ? Colors.white : Colors.blue,
-              onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => const LoginPage()),
-                // );
-              },
+              onPressed: () {},
               icon: const Icon(Icons.person)),
-          Switch(
-              value: isInstructionView,
-              onChanged: (bool isOn) {
-                setState(() {
-                  isInstructionView = isOn;
-                  Global.shared.isInstructionView = isOn;
-                  isOn = !isOn;
-                  isOn
-                      ? Get.changeThemeMode(ThemeMode.dark)
-                      : Get.changeThemeMode(ThemeMode.light);
-                });
-              })
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: Card(
-          child: ListView(
-            dragStartBehavior: DragStartBehavior.start,
-            reverse: true,
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            children: <Widget>[
-              const SizedBox(height: 10.0),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints viewportConstraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints:
+                  BoxConstraints(minHeight: viewportConstraints.maxHeight),
+              child: Column(
                 mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Image.asset('assets/diamond.png'),
-                  const SizedBox(height: 5.0),
-                  Text(
-                    'REGISTER',
-                    style: Theme.of(context).textTheme.headline5,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(),
+                  SizedBox(
+                    width: _width < 900 ? _width * 0.80 : _width / 2,
+                    child: Card(
+                      elevation: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Image.asset('assets/diamond.png'),
+                              const SizedBox(height: 5.0),
+                              Text(
+                                'REGISTRO',
+                                style: Theme.of(context).textTheme.headline5,
+                              ),
+                              //const SizedBox(height: 5.0),
+                              //user != null ? _UserInfoCard(user: user) : Container(),
+                              //const SizedBox(height: 10.0),
+                              user == null
+                                  ? CardUserPass(
+                                      usernameController: _emailController,
+                                      usernameFocusNode: _usernameFocusNode,
+                                      unfocusedColor: _unfocusedColor,
+                                      passwordController: _passwordController,
+                                      passwordFocusNode: _passwordFocusNode)
+                                  : Container(),
+                              user == null ? buttonBar : Container(),
+                              Text(_success == null
+                                  ? _error.replaceAll(
+                                      '[firebase_auth/invalid-email]', '')
+                                  : 'Concluído')
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  //const SizedBox(height: 5.0),
-                  //user != null ? _UserInfoCard(user: user) : Container(),
-                  //const SizedBox(height: 10.0),
-                  user == null
-                      ? CardUserPass(
-                          usernameController: _usernameController,
-                          usernameFocusNode: _usernameFocusNode,
-                          unfocusedColor: _unfocusedColor,
-                          passwordController: _passwordController,
-                          passwordFocusNode: _passwordFocusNode)
-                      : Container(),
-                  //user == null ? buttonBar : Container(),
                 ],
               ),
-
-              //const SizedBox(height: 100.0),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  // Example code of how to sign in with email and password.
-  Future<void> _signInWithEmailAndPassword() async {
+// Example code for registration.
+  Future<void> _register() async {
     try {
-      final User user = (await _auth.signInWithEmailAndPassword(
-        email: _usernameController.text,
+      final User? user = (await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text,
         password: _passwordController.text,
       ))
-          .user!;
-      ScaffoldSnackbar.of(context).show('${user.email} conectado');
+          .user;
+      if (user != null) {
+        setState(() {
+          _success = true;
+          _userEmail = user.email ?? '';
+        });
+      } else {
+        _success = false;
+      }
     } catch (e) {
-      ScaffoldSnackbar.of(context).show('Falha ao conectar com email & senha');
+      setState(() {
+        _error = e.toString();
+      });
     }
   }
 }

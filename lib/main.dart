@@ -9,11 +9,25 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:ericode2022/firebase_config.dart';
 import 'package:get/get.dart';
 import 'loginAndRegister.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
+
+// Change to false to use live database instance.
+const USE_DATABASE_EMULATOR = true;
+// The port we've set the Firebase Database emulator to run on via the
+// `firebase.json` configuration file.
+const emulatorPort = 9000;
+// Android device emulators consider localhost of the host machine as 10.0.2.2
+// so let's use that if running on Android.
+final emulatorHost =
+    (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
+        ? '10.0.2.2'
+        : 'localhost';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +43,7 @@ final ThemeData _darkTheme = ThemeData(
   //primaryColor: Colors.grey[100],
   primaryColorBrightness: Brightness.dark,
   colorScheme: const ColorScheme.dark(
-      onPrimary: Colors.amber,
+      onPrimary: Colors.white,
       secondary: Colors.green,
       onSecondary: Colors.pink,
       primary: Colors.green,
@@ -94,24 +108,6 @@ class _RootNavigatorState extends State<RootNavigator> {
   }
 }
 
-class SimplePage extends StatefulWidget {
-  const SimplePage({Key? key}) : super(key: key);
-
-  @override
-  _SimplePageState createState() => _SimplePageState();
-}
-
-class _SimplePageState extends State<SimplePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [const TextField()],
-      ),
-    );
-  }
-}
-
 class Global {
   static final shared = Global();
   bool isInstructionView = false;
@@ -125,6 +121,7 @@ class FullPageHome extends StatefulWidget {
 }
 
 class _FullPageHomeState extends State<FullPageHome> {
+  bool isOn = Global.shared.isInstructionView;
   late bool isInstructionView;
   User? user;
   @override
@@ -135,7 +132,6 @@ class _FullPageHomeState extends State<FullPageHome> {
         );
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +144,7 @@ class _FullPageHomeState extends State<FullPageHome> {
           title: const Text('ericodigos.dev'),
           actions: <Widget>[
             IconButton(
-              color: user == null ? Colors.white : Colors.blue,
+                color: user == null ? Colors.white : Colors.blue,
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -156,24 +152,22 @@ class _FullPageHomeState extends State<FullPageHome> {
                   );
                 },
                 icon: const Icon(Icons.person)),
-            Switch(
-                value: isInstructionView,
-                onChanged: (bool isOn) {
-                  setState(() {
-                    isInstructionView = isOn;
-                    Global.shared.isInstructionView = isOn;
-                    isOn = !isOn;
-                    isOn
-                        ? Get.changeThemeMode(ThemeMode.dark)
-                        : Get.changeThemeMode(ThemeMode.light);
-                  });
-                })
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  isOn
+                      ? Get.changeThemeMode(ThemeMode.dark)
+                      : Get.changeThemeMode(ThemeMode.light);
+                  isOn = !isOn;
+                  Global.shared.isInstructionView = isOn;
+                });
+              },
+              icon: Icon(Global.shared.isInstructionView ? Icons.dark_mode : Icons.light_mode)),
           ],
         ),
         body: Center(
           child: BodyFrontPage(width: _width),
         ),
-        
       ),
     );
   }
@@ -225,8 +219,8 @@ class BodyFrontPage extends StatelessWidget {
                             Card(
                               elevation: 12,
                               color: Theme.of(context).colorScheme.secondary,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
+                              child: const Padding(
+                                padding: EdgeInsets.all(8.0),
                                 child: Text('ERIC OLIVEIRA LIMA'),
                               ),
                             ),
