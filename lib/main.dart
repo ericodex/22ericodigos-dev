@@ -6,38 +6,41 @@
 // 18 - JAN - 22
 // Application for professional information display
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:ericode2022/firebase_config.dart';
 import 'package:get/get.dart';
-import 'loginAndRegister.dart';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
+import 'login_register.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kDebugMode, kIsWeb;
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 // Change to false to use live database instance.
-const USE_DATABASE_EMULATOR = true;
-// The port we've set the Firebase Database emulator to run on via the
-// `firebase.json` configuration file.
+const useDatabaseEmulator = true;
 const emulatorPort = 9000;
-// Android device emulators consider localhost of the host machine as 10.0.2.2
-// so let's use that if running on Android.
 final emulatorHost =
     (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
         ? '10.0.2.2'
         : 'localhost';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  //WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseConfig.platformOptions);
   await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
 
+  if (useDatabaseEmulator) {
+    FirebaseDatabase.instance.useDatabaseEmulator(emulatorHost, emulatorPort);
+  }
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const RootNavigator());
 }
 
-// Theme Dark
+// Theme dark and light
 final ThemeData _darkTheme = ThemeData(
   //primarySwatch: Colors.green,
   //primaryColor: Colors.grey[100],
@@ -57,23 +60,22 @@ final ThemeData _darkTheme = ThemeData(
       error: Colors.red,
       onError: Colors.redAccent),
 );
-
-// Theme Light
 final ThemeData _lightTheme = ThemeData(
   colorScheme: const ColorScheme.light(
-      primary: Colors.green,
-      onPrimary: Colors.white,
-      secondary: Colors.green,
-      onSecondary: Colors.pink,
-      background: Colors.cyan,
-      brightness: Brightness.light,
-      primaryVariant: Colors.greenAccent,
-      //onBackground: Colors.purple,
-      onSurface: Colors.green,
-      //secondaryVariant: Colors.blueGrey,
-      surface: Colors.grey,
-      error: Colors.red,
-      onError: Colors.redAccent),
+      primary: Colors.red,
+      // onPrimary: Colors.white,
+      // secondary: Colors.white,
+      // onSecondary: Colors.pink,
+      // background: Colors.cyan,
+      // brightness: Brightness.light,
+      // primaryVariant: Colors.greenAccent,
+      // //onBackground: Colors.purple,
+      // onSurface: Colors.green,
+      // //secondaryVariant: Colors.blueGrey,
+      // surface: Colors.grey,
+      // error: Colors.red,
+      // onError: Colors.redAccent
+      ),
 );
 
 class RootNavigator extends StatefulWidget {
@@ -86,24 +88,22 @@ class RootNavigator extends StatefulWidget {
 }
 
 class _RootNavigatorState extends State<RootNavigator> {
-  //ThemeMode _themeMode = ThemeMode.system;
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       routes: <String, WidgetBuilder>{
-        '/a': (BuildContext context) => FullPageHome(),
-        '/b': (BuildContext context) => ChatPage(),
-        '/c': (BuildContext context) => LoginPage(),
-        '/register': (BuildContext context) => RegisterPage(),
+        '/': (BuildContext context) => const FullPageHome(),
+        '/b': (BuildContext context) => const ChatPage(),
+        '/c': (BuildContext context) => const LoginPage(),
+        '/register': (BuildContext context) => const RegisterPage(),
       },
-      initialRoute: '/a',
+      initialRoute: '/',
       debugShowCheckedModeBanner: false,
       title: 'ericódigos',
       theme: _lightTheme,
       darkTheme: _darkTheme,
       themeMode: ThemeMode.system,
-      //home:
     );
   }
 }
@@ -124,19 +124,79 @@ class _FullPageHomeState extends State<FullPageHome> {
   bool isOn = Global.shared.isInstructionView;
   late bool isInstructionView;
   User? user;
+  String _frontMsg = '';
+  //late DatabaseReference _frontMsgRef;
+  bool initialized = false;
+  //late FirebaseAuth _auth;
+  //late DatabaseReference _messagesRef;
+  //late StreamSubscription<DatabaseEvent> _counterSubscription;
+  //late StreamSubscription<DatabaseEvent> _messagesSubscription;
+
+  //--------- inset ----------
+  final _databaseInst = FirebaseDatabase.instance;
+  final _database = FirebaseDatabase.instance.ref();
+  late StreamSubscription _dataBaseStream;
+  //final DatabaseReference _frontMsgRef = FirebaseDatabase.instance.ref('frontMsg');
+
   @override
   void initState() {
     isInstructionView = Global.shared.isInstructionView;
     _auth.userChanges().listen(
           (event) => setState(() => user = event),
         );
+    init();
+    setState(() {
+      initialized = true;
+    });
     super.initState();
+    _activateListeners();
   }
 
+  void _activateListeners(){
+    _dataBaseStream = _database.child('/frontMsg/').onValue.listen((event) {
+      final String _frontPageMsg = event.snapshot.value.toString();
+
+      
+      setState(() {
+        _frontMsg = _frontPageMsg;
+      });
+    });
+
+  }
+
+  Future<void> init() async {
+    try {
+      //final frontMsgSnapshot = await _frontMsgRef.get();
+
+     // _frontMsg = frontMsgSnapshot.value.toString();
+      if (kDebugMode) {
+        print(_frontMsg);
+      }
+    } catch (err) {
+      if (kDebugMode) {
+        print(err);
+      }
+    }
+
+    _databaseInst.setLoggingEnabled(false);
+
+    if (!kIsWeb) {
+      _databaseInst.setPersistenceEnabled(true);
+      _databaseInst.setPersistenceCacheSizeBytes(10000000);
+    }
+
+    if (!kIsWeb) {
+     // await _frontMsgRef.keepSynced(true);
+    }
+    
+  }
+refresh() {
+  setState(() {});
+}
   @override
   Widget build(BuildContext context) {
     double _width = MediaQuery.of(context).size.width;
-
+    if (!initialized) return Container();
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.bodyText2!,
       child: Scaffold(
@@ -144,43 +204,71 @@ class _FullPageHomeState extends State<FullPageHome> {
           title: const Text('ericodigos.dev'),
           actions: <Widget>[
             IconButton(
-                color: user == null ? Colors.white : Colors.blue,
+                //color: user == null ? Colors.white : Colors.blue,
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const LoginPage()),
                   );
                 },
+                color: user == null ? Colors.grey : Colors.green,
                 icon: const Icon(Icons.person)),
             IconButton(
-              onPressed: () {
-                setState(() {
-                  isOn
-                      ? Get.changeThemeMode(ThemeMode.dark)
-                      : Get.changeThemeMode(ThemeMode.light);
-                  isOn = !isOn;
-                  Global.shared.isInstructionView = isOn;
-                });
-              },
-              icon: Icon(Global.shared.isInstructionView ? Icons.dark_mode : Icons.light_mode)),
+                onPressed: () {
+                  setState(() {
+                    isOn
+                        ? Get.changeThemeMode(ThemeMode.dark)
+                        : Get.changeThemeMode(ThemeMode.light);
+                    isOn = !isOn;
+                    Global.shared.isInstructionView = isOn;
+                  });
+                },
+                color: Colors.white,
+                icon: Icon(Global.shared.isInstructionView
+                    ? Icons.dark_mode
+                    : Icons.light_mode)),
           ],
         ),
         body: Center(
-          child: BodyFrontPage(width: _width),
+          child: BodyFrontPage(width: _width, frontMsg: _frontMsg, notifyParent: refresh),
         ),
+        
       ),
     );
   }
+
+  @override
+  void deactivate() {
+    _dataBaseStream.cancel();
+    super.deactivate();
+  }
+
 }
 
-class BodyFrontPage extends StatelessWidget {
+class BodyFrontPage extends StatefulWidget {
+  final Function() notifyParent;
   const BodyFrontPage({
     Key? key,
     required double width,
+    required String frontMsg, required this.notifyParent,
   })  : _width = width,
+        _frontMsg = frontMsg,
         super(key: key);
 
   final double _width;
+  final String _frontMsg;
+  
+
+  @override
+  State<BodyFrontPage> createState() => _BodyFrontPageState();
+}
+
+class _BodyFrontPageState extends State<BodyFrontPage> {
+  
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +288,9 @@ class BodyFrontPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(18.0),
                   child: SizedBox(
-                    width: _width < 900 ? _width * 0.80 : _width / 2,
+                    width: widget._width < 900
+                        ? widget._width * 0.80
+                        : widget._width / 2,
                     child: Card(
                       elevation: 8,
                       child: Padding(
@@ -230,18 +320,22 @@ class BodyFrontPage extends StatelessWidget {
                     ),
                   ),
                 ),
+                //Text(widget._frontMsg),
+                
                 Padding(
                   padding: const EdgeInsets.all(18.0),
                   child: SizedBox(
-                    width: _width < 900 ? _width * 0.80 : _width / 2,
-                    child: const Card(
+                    width: widget._width < 900
+                        ? widget._width * 0.80
+                        : widget._width / 2,
+                    child: Card(
                       elevation: 8,
                       child: Padding(
-                        padding: EdgeInsets.all(18.0),
+                        padding: const EdgeInsets.all(18.0),
                         child: Text(
-                            'Arquiteto de sistemas de informação, desenvolvedor e mantenedor de ecossistemas digitais. Atuação em projetos web com Dart/Flutter, Java Spring e .NET Core/MVC. Conhecimento em Bootstrap, JQuery, SQL, NoSQL, Integration Services (ETL), Oracle, Python e Jupyter Notebooks.  Atualizações de certificados de segurança de domínio e criptografia OpenSSL. Implementações de microserviços com Docker, Kubernetes/Portainer em nuvens públicas e privadas.',
+                            widget._frontMsg,
                             textAlign: TextAlign.start,
-                            style: TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16),
                             softWrap: true),
                       ),
                     ),
@@ -253,7 +347,7 @@ class BodyFrontPage extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      IconButton(onPressed: () {}, icon: Icon(Icons.home)),
+                      IconButton(onPressed: () {}, icon: const Icon(Icons.home)),
                       IconButton(
                           onPressed: () {
                             Navigator.push(
@@ -262,8 +356,8 @@ class BodyFrontPage extends StatelessWidget {
                                   builder: (context) => const ChatPage()),
                             );
                           },
-                          icon: Icon(Icons.business)),
-                      IconButton(onPressed: () {}, icon: Icon(Icons.school))
+                          icon: const Icon(Icons.business)),
+                      IconButton(onPressed: () {}, icon: const Icon(Icons.school))
                     ],
                   ),
                 )

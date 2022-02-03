@@ -1,24 +1,7 @@
-// Copyright 2018-present the Flutter authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-import 'main.dart';
-import 'package:flutter/gestures.dart';
+import 'package:ericode2022/main.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-//import 'package:ericode2022/navigatorStateExtension.dart';
-//import 'main.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -36,10 +19,10 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool? _success;
-  String _userEmail = '';
   User? user;
   late bool isInstructionView;
+  late FirebaseAuth auth;
+
   @override
   void initState() {
     super.initState();
@@ -64,7 +47,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    double _height = MediaQuery.of(context).size.height;
     double _width = MediaQuery.of(context).size.width;
     bool isOn = Global.shared.isInstructionView;
     var buttonBar = ButtonBar(
@@ -123,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
         title: const Text('ericodigos.dev'),
         actions: <Widget>[
           IconButton(
-              color: user == null ? Colors.white : Colors.blue,
+              //color: user == null ? Colors.white : Colors.blue,
               onPressed: () {},
               icon: const Icon(Icons.person)),
           IconButton(
@@ -136,7 +118,10 @@ class _LoginPageState extends State<LoginPage> {
                   Global.shared.isInstructionView = isOn;
                 });
               },
-              icon: Icon(Global.shared.isInstructionView ? Icons.dark_mode : Icons.light_mode)),
+              color: Colors.white,
+              icon: Icon(Global.shared.isInstructionView
+                  ? Icons.dark_mode
+                  : Icons.light_mode)),
         ],
       ),
       body: LayoutBuilder(
@@ -348,8 +333,8 @@ class _UserInfoCardState extends State<_UserInfoCard> {
                     ),
                   ),
                 ),
-            Text(
-              widget.user == null
+                Text(
+                widget.user == null
                   ? 'Desconectado'
                   : '${widget.user!.isAnonymous ? 'User is anonymous\n\n' : ''}'
                       'Email: ${widget.user!.email} (verified: ${widget.user!.emailVerified})\n\n'
@@ -361,7 +346,7 @@ class _UserInfoCardState extends State<_UserInfoCard> {
                       'Criado em: ${widget.user!.metadata.creationTime.toString()}\n\n'
                       'Última conexão: ${widget.user!.metadata.lastSignInTime}\n\n',
             ),
-            if (widget.user != null)
+              if (widget.user != null)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -523,7 +508,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordFocusNode = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool? _success;
-  String _userEmail = '';
   String _error = '';
   User? user;
   late bool isInstructionView;
@@ -532,17 +516,17 @@ class _RegisterPageState extends State<RegisterPage> {
     super.initState();
     isInstructionView = Global.shared.isInstructionView;
 
-    _usernameFocusNode.addListener(() {
-      setState(() {
-        //Redraw so that the username label reflects the focus state
-      });
-    });
+    // _usernameFocusNode.addListener(() {
+    //   setState(() {
+    //     //Redraw so that the username label reflects the focus state
+    //   });
+    // });
 
-    _passwordFocusNode.addListener(() {
-      setState(() {
-        //Redraw so that the password label reflects the focus state
-      });
-    });
+    // _passwordFocusNode.addListener(() {
+    //   setState(() {
+    //     //Redraw so that the password label reflects the focus state
+    //   });
+    // });
 
     _auth.userChanges().listen(
           (event) => setState(() => user = event),
@@ -664,7 +648,6 @@ class _RegisterPageState extends State<RegisterPage> {
       if (user != null) {
         setState(() {
           _success = true;
-          _userEmail = user.email ?? '';
         });
       } else {
         _success = false;
