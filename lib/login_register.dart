@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ericode2022/main.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   User? user;
   late bool isInstructionView;
   late FirebaseAuth auth;
+  late StreamSubscription<User?> _sub;
 
   @override
   void initState() {
@@ -40,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
       });
     });
 
-    _auth.userChanges().listen(
+    _sub = _auth.userChanges().listen(
           (event) => setState(() => user = event),
         );
   }
@@ -105,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
         title: const Text('ericodigos.dev'),
         actions: <Widget>[
           IconButton(
-              //color: user == null ? Colors.white : Colors.blue,
+              color: user == null ? Colors.grey : Colors.blue,
               onPressed: () {},
               icon: const Icon(Icons.person)),
           IconButton(
@@ -185,8 +188,11 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
+    _sub.cancel();
     _usernameController.dispose();
     _passwordController.dispose();
+    _passwordFocusNode.dispose();
+    _usernameFocusNode.dispose();
     super.dispose();
   }
 
@@ -229,37 +235,40 @@ class CardUserPass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Column(
-        children: [
-          TextField(
-            enableSuggestions: true,
-            controller: _usernameController,
-            decoration: InputDecoration(
-              labelText: 'Usuário',
-              labelStyle: TextStyle(
-                color: _usernameFocusNode.hasFocus
-                    ? Theme.of(context).colorScheme.secondary
-                    : _unfocusedColor,
+      child: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          children: [
+            TextField(
+              enableSuggestions: true,
+              controller: _usernameController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                labelStyle: TextStyle(
+                  color: _usernameFocusNode.hasFocus
+                      ? Theme.of(context).colorScheme.secondary
+                      : _unfocusedColor,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 12.0),
-          TextField(
-            obscureText: true,
-            enableSuggestions: true,
-            autocorrect: false,
-            controller: _passwordController,
-            decoration: InputDecoration(
-              labelText: 'Senha',
-              labelStyle: TextStyle(
-                color: _passwordFocusNode.hasFocus
-                    ? Theme.of(context).colorScheme.secondary
-                    : _unfocusedColor,
+            const SizedBox(height: 12.0),
+            TextField(
+              obscureText: true,
+              enableSuggestions: true,
+              autocorrect: false,
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: 'Senha',
+                labelStyle: TextStyle(
+                  color: _passwordFocusNode.hasFocus
+                      ? Theme.of(context).colorScheme.secondary
+                      : _unfocusedColor,
+                ),
               ),
+              focusNode: _passwordFocusNode,
             ),
-            focusNode: _passwordFocusNode,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -295,6 +304,7 @@ class _UserInfoCard extends StatefulWidget {
 }
 
 class _UserInfoCardState extends State<_UserInfoCard> {
+  
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -311,6 +321,7 @@ class _UserInfoCardState extends State<_UserInfoCard> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
+
             if (widget.user != null)
               if (widget.user!.photoURL != null)
                 SizedBox(
@@ -321,20 +332,21 @@ class _UserInfoCardState extends State<_UserInfoCard> {
                     child: Image.network(widget.user!.photoURL!),
                   ),
                 )
+
               else
                 Align(
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     margin: const EdgeInsets.only(bottom: 8),
-                    color: Colors.black,
+                    //color: Colors.black,
                     child: const Text(
                       'No image',
                       textAlign: TextAlign.center,
                     ),
                   ),
                 ),
-                Text(
-                widget.user == null
+              Text(
+              widget.user == null
                   ? 'Desconectado'
                   : '${widget.user!.isAnonymous ? 'User is anonymous\n\n' : ''}'
                       'Email: ${widget.user!.email} (verified: ${widget.user!.emailVerified})\n\n'
@@ -345,8 +357,9 @@ class _UserInfoCardState extends State<_UserInfoCard> {
                       //'Refresh token: ${widget.user!.refreshToken}\n\n\n'
                       'Criado em: ${widget.user!.metadata.creationTime.toString()}\n\n'
                       'Última conexão: ${widget.user!.metadata.lastSignInTime}\n\n',
-            ),
-              if (widget.user != null)
+              ),
+
+            //if (widget.user != null)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -412,6 +425,7 @@ class _UserInfoCardState extends State<_UserInfoCard> {
                 ),
               ),
             ),
+
           ],
         ),
       ),
@@ -507,30 +521,33 @@ class _RegisterPageState extends State<RegisterPage> {
   final _usernameFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool? _success;
+  bool _success = false;
   String _error = '';
   User? user;
-  late bool isInstructionView;
+  bool isInstructionView = Global.shared.isInstructionView;
+
   @override
   void initState() {
     super.initState();
-    isInstructionView = Global.shared.isInstructionView;
 
-    // _usernameFocusNode.addListener(() {
-    //   setState(() {
-    //     //Redraw so that the username label reflects the focus state
-    //   });
-    // });
+    _usernameFocusNode.addListener(() {
+      setState(() {
+        //Redraw so that the username label reflects the focus state
+      });
+    });
 
-    // _passwordFocusNode.addListener(() {
-    //   setState(() {
-    //     //Redraw so that the password label reflects the focus state
-    //   });
-    // });
+    _passwordFocusNode.addListener(() {
+      setState(() {
+        //Redraw so that the password label reflects the focus state
+      });
+    });
 
-    _auth.userChanges().listen(
-          (event) => setState(() => user = event),
-        );
+    // if (mounted){
+    //   _auth.userChanges().listen(
+    //     (event) => setState(() => user = event),
+    //   );
+    // }
+  
   }
 
   @override
@@ -602,7 +619,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               //const SizedBox(height: 5.0),
                               //user != null ? _UserInfoCard(user: user) : Container(),
                               //const SizedBox(height: 10.0),
-                              user == null
+                              _success == false
                                   ? CardUserPass(
                                       usernameController: _emailController,
                                       usernameFocusNode: _usernameFocusNode,
@@ -610,8 +627,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                       passwordController: _passwordController,
                                       passwordFocusNode: _passwordFocusNode)
                                   : Container(),
-                              user == null ? buttonBar : Container(),
-                              Text(_success == null
+                              _success == false ? buttonBar : Container(),
+                              Text(_success == false
                                   ? _error.replaceAll(
                                       '[firebase_auth/invalid-email]', '')
                                   : 'Concluído')
@@ -630,12 +647,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
+
 
 // Example code for registration.
   Future<void> _register() async {
@@ -646,16 +658,30 @@ class _RegisterPageState extends State<RegisterPage> {
       ))
           .user;
       if (user != null) {
-        setState(() {
+        if(mounted) {
+          setState(() {
           _success = true;
         });
+        }
       } else {
         _success = false;
       }
     } catch (e) {
-      setState(() {
+      if(mounted) {
+        setState(() {
         _error = e.toString();
       });
+      }
     }
+  }
+
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _usernameFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
   }
 }

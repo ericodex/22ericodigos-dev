@@ -20,7 +20,7 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform, kDebugMode,
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 // Change to false to use live database instance.
-const useDatabaseEmulator = true;
+const useDatabaseEmulator = false;
 const emulatorPort = 9000;
 final emulatorHost =
     (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
@@ -30,7 +30,7 @@ final emulatorHost =
 Future<void> main() async {
   //WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseConfig.platformOptions);
-  await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  useDatabaseEmulator ? await FirebaseAuth.instance.useAuthEmulator('localhost', 9099) : null;
 
   if (useDatabaseEmulator) {
     FirebaseDatabase.instance.useDatabaseEmulator(emulatorHost, emulatorPort);
@@ -137,13 +137,17 @@ class _FullPageHomeState extends State<FullPageHome> {
   final _database = FirebaseDatabase.instance.ref();
   late StreamSubscription _dataBaseStream;
   //final DatabaseReference _frontMsgRef = FirebaseDatabase.instance.ref('frontMsg');
+  late StreamSubscription<User?> _sub;
+
 
   @override
   void initState() {
     isInstructionView = Global.shared.isInstructionView;
-    _auth.userChanges().listen(
-          (event) => setState(() => user = event),
-        );
+    
+  _sub = _auth.userChanges().listen(
+    (event) => setState(() => user = event),
+  );
+
     init();
     setState(() {
       initialized = true;
@@ -156,7 +160,6 @@ class _FullPageHomeState extends State<FullPageHome> {
     _dataBaseStream = _database.child('/frontMsg/').onValue.listen((event) {
       final String _frontPageMsg = event.snapshot.value.toString();
 
-      
       setState(() {
         _frontMsg = _frontPageMsg;
       });
@@ -235,6 +238,12 @@ refresh() {
         
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
   }
 
   @override
@@ -371,8 +380,10 @@ class _BodyFrontPageState extends State<BodyFrontPage> {
 }
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({Key? key}) : super(key: key);
+  const ChatPage({Key? key, this.user}) : super(key: key);
 
+  final User? user;
+  
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
@@ -382,6 +393,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _isComposing = false;
+
+  late StreamSubscription<User?> _sub;
+  String _name = 'Anônimo';
 
   void _handleSubmitted(String text) {
     _textController.clear();
@@ -450,6 +464,34 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          title: const Text('ericodigos.dev'),
+          actions: <Widget>[
+            IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+                },
+                //color: user == null ? Colors.grey : Colors.green,
+                icon: const Icon(Icons.person)),
+            IconButton(
+                onPressed: () {
+                  setState(() {
+                    // isOn
+                    //     ? Get.changeThemeMode(ThemeMode.dark)
+                    //     : Get.changeThemeMode(ThemeMode.light);
+                    // isOn = !isOn;
+                    // Global.shared.isInstructionView = isOn;
+                  });
+                },
+                color: Colors.white,
+                icon: Icon(Global.shared.isInstructionView
+                    ? Icons.dark_mode
+                    : Icons.light_mode)),
+          ],
+        ),
         body: Column(
       children: [
         Flexible(
@@ -479,6 +521,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _sub.cancel();
     for (var message in _messages) {
       message.animationController.dispose();
     }
@@ -491,12 +534,13 @@ class ChatMessage extends StatelessWidget {
   const ChatMessage({
     required this.text,
     required this.animationController,
-    Key? key,
+    Key? key, this.user,
   }) : super(key: key);
 
+  final User? user;
   final String text;
   final AnimationController animationController;
-  final String _name = '>';
+  final String _name = '>'; //widget.user!.displayName;// '';
 
   @override
   Widget build(BuildContext context) {
